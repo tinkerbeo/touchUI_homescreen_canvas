@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Whiteboard OS + Virtual Touchpad</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="toast">Ready</div>
+
+    <!-- Top OS Status Bar -->
+    <div id="top-bar">
+        <div class="bar-left">
+            <span class="os-brand">⬜ Whiteboard OS</span>
+            <span id="zoom-badge">100%</span>
+            <span id="active-win-badge">Home</span>
+        </div>
+        <div class="bar-right">
+            <div class="os-btn" id="btn-reset-view" data-os-action="reset-view">⌖ Center</div>
+            <div class="os-btn active" id="btn-pad-settings" data-os-action="toggle-pad-controls">⚙️ Pad</div>
+        </div>
+    </div>
+
+    <!-- Collapsible Touchpad Radius Controls (Direct-Touch Safe) -->
+    <div id="pad-controls">
+        <div class="control-item">
+            <label for="slider-pad-radius">Pad R: <span id="val-pad-radius">60px</span></label>
+            <input type="range" id="slider-pad-radius" min="20" max="120" step="2" value="60">
+        </div>
+        <div class="control-item">
+            <label for="slider-multi-radius">Multi R: <span id="val-multi-radius">120px</span></label>
+            <input type="range" id="slider-multi-radius" min="40" max="240" step="2" value="120">
+        </div>
+        <label class="switch-item" for="toggle-multi-ring">
+            <span>Show Multi Ring</span>
+            <input type="checkbox" id="toggle-multi-ring">
+            <span class="switch-slider"></span>
+        </label>
+    </div>
+
+    <!-- Bounded Whiteboard Viewport -->
+    <div id="whiteboard-viewport">
+        <!-- Transformed World Space (2000 x 2000) -->
+        <div id="canvas-world">
+            <canvas id="ink-canvas" width="2000" height="2000"></canvas>
+            <div id="canvas-icons"></div>
+            <div id="canvas-windows"></div>
+        </div>
+
+        <!-- Full-Screen App Window Host (100% Viewport Overlay) -->
+        <div id="fullscreen-host"></div>
+    </div>
+
+    <!-- tldraw-Style Floating Tool Dock -->
+    <div id="tool-dock">
+        <div class="dock-btn active" data-tool="select" title="Select & Move">↖ Select</div>
+        <div class="dock-btn" data-tool="pen" title="Draw on Whiteboard">✏️ Pen</div>
+        <div class="dock-btn" data-tool="eraser" title="Erase Ink">🧽 Eraser</div>
+        <div class="dock-divider"></div>
+        <div class="ink-swatch active" data-color="#202124" style="background:#202124;"></div>
+        <div class="ink-swatch" data-color="#1a73e8" style="background:#1a73e8;"></div>
+        <div class="ink-swatch" data-color="#e53935" style="background:#e53935;"></div>
+        <div class="ink-swatch" data-color="#0f9d58" style="background:#0f9d58;"></div>
+        <div class="dock-divider"></div>
+        <div class="dock-btn" data-action="clear-ink" title="Clear Whiteboard Ink">🗑️</div>
+    </div>
+
+    <!-- OS-Level Cell Drag Ghost & Context Menu -->
+    <div id="drag-ghost"></div>
+    <div id="context-menu">
+        <div class="menu-item" data-menu="edit">✏️ Chord Input</div>
+        <div class="menu-item" data-menu="copy">📋 Copy</div>
+        <div class="menu-item" data-menu="cut">✂️ Cut</div>
+        <div class="menu-item" data-menu="paste">📄 Paste</div>
+        <div class="menu-item" data-menu="bold"><b>B</b> Toggle Bold</div>
+        <div class="menu-item" data-menu="clear">🗑️ Clear Cell</div>
+        <div class="color-row">
+            <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;"></div>
+            <div class="color-swatch" data-color="#d4edda" style="background:#d4edda;"></div>
+            <div class="color-swatch" data-color="#fff3cd" style="background:#fff3cd;"></div>
+            <div class="color-swatch" data-color="#cce5ff" style="background:#cce5ff;"></div>
+            <div class="color-swatch" data-color="#f8d7da" style="background:#f8d7da;"></div>
+        </div>
+    </div>
+
+    <!-- Floating Chorded Keyboard Layer -->
+    <canvas id="kbCanvas"></canvas>
+    <div class="kb-btn" id="btnSpace" title="Space">␣</div>
+    <div class="kb-btn" id="btnBackspace" title="Backspace">⌫</div>
+    <div class="kb-btn" id="btnMode" title="Toggle Numbers/Letters">123</div>
+    <div class="kb-btn" id="btnDone" title="Save & Close">✔</div>
+
+    <!-- Multi-Touch Error Room Ring (Hidden by default) -->
+    <div id="multi-touch-ring"></div>
+
+    <!-- Clear Frosted Glass Circle Touchpad -->
+    <div id="touchpad"></div>
+
+    <!-- Clear Frosted Glass Virtual Mouse Cursor -->
+    <div id="cursor"></div>
+
+    <!-- Modular Scripts (Order matters: sheets-app.js before home-canvas.js) -->
+    <script src="chord-keyboard.js"></script>
+    <script src="touchpad.js"></script>
+    <script src="sheets-app.js"></script>
+    <script src="home-canvas.js"></script>
+</body>
+</html>

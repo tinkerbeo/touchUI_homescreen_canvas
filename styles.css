@@ -1,0 +1,870 @@
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #eef1f5;
+    color: #202124;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top OS Status Bar */
+#top-bar {
+    height: 44px;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid #dadce0;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 500;
+    flex-shrink: 0;
+}
+
+.bar-left, .bar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.os-brand {
+    font-weight: 700;
+    font-size: 14px;
+    color: #202124;
+}
+
+#zoom-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 3px 7px;
+    border-radius: 10px;
+}
+
+#active-win-badge {
+    font-size: 11px;
+    font-weight: 600;
+    background: #e8f0fe;
+    color: #1a73e8;
+    padding: 3px 8px;
+    border-radius: 10px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.os-btn {
+    padding: 5px 9px;
+    background: #f1f3f4;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3c4043;
+}
+
+.os-btn.active {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+    color: #1a73e8;
+}
+
+/* Collapsible Touchpad Controls Bar */
+#pad-controls {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    z-index: 490;
+    touch-action: auto;
+    flex-shrink: 0;
+}
+
+#pad-controls.hidden {
+    display: none;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3c4043;
+    flex: 1 1 150px;
+}
+
+.control-item label {
+    min-width: 82px;
+    white-space: nowrap;
+}
+
+.control-item input[type="range"] {
+    flex: 1;
+    accent-color: #1a73e8;
+    height: 22px;
+    margin: 0;
+}
+
+.switch-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3c4043;
+    white-space: nowrap;
+}
+
+.switch-item input[type="checkbox"] {
+    display: none;
+}
+
+.switch-slider {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    background: #bdc1c6;
+    border-radius: 22px;
+    transition: background 0.2s;
+}
+
+.switch-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+}
+
+.switch-item input:checked + .switch-slider {
+    background: #f59f00;
+}
+
+.switch-item input:checked + .switch-slider::after {
+    transform: translateX(16px);
+}
+
+/* Whiteboard Viewport & Bounded tldraw-Style Canvas */
+#whiteboard-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: #e5e9f0;
+}
+
+#canvas-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2000px;
+    height: 2000px;
+    transform-origin: 0 0;
+    background-color: #ffffff;
+    background-image: radial-gradient(#cfd6df 1.3px, transparent 1.3px);
+    background-size: 28px 28px;
+    border: 2px solid #cbd3de;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    will-change: transform;
+}
+
+#ink-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2000px;
+    height: 2000px;
+    z-index: 2;
+}
+
+#canvas-icons {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#canvas-windows {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 30;
+}
+
+/* Whiteboard App Icons */
+.wb-app-icon {
+    position: absolute;
+    width: 82px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+    transition: transform 0.12s;
+}
+
+.wb-app-icon.selected .wb-icon-tile {
+    outline: 3px solid #1a73e8;
+    outline-offset: 2px;
+}
+
+.wb-app-icon.dragging {
+    transform: scale(1.08);
+    z-index: 999;
+    opacity: 0.9;
+}
+
+.wb-icon-tile {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+
+.wb-icon-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #202124;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 2px 7px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+/* Floating & Full-Screen App Windows */
+.app-window {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.app-window.focused {
+    border-color: #1a73e8;
+    box-shadow: 0 16px 40px rgba(26, 115, 232, 0.2);
+}
+
+.app-window.is-fullscreen {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.win-titlebar {
+    height: 38px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.win-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #202124;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+}
+
+.win-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.win-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid #dadce0;
+    background: #ffffff;
+    color: #3c4043;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.win-btn.close-btn {
+    color: #d93025;
+}
+
+.win-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.win-resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, transparent 50%, rgba(26, 115, 232, 0.35) 50%);
+    border-bottom-right-radius: 13px;
+    z-index: 20;
+}
+
+.app-window.is-fullscreen .win-resize-handle {
+    display: none;
+}
+
+/* Full-Screen Overlay Host */
+#fullscreen-host {
+    position: absolute;
+    inset: 0;
+    z-index: 400;
+    pointer-events: none;
+    display: flex;
+}
+
+/* Placeholder / Mini App Content Styling (Replaced by Full Apps in Batch 2+) */
+.demo-app-scroll {
+    flex: 1;
+    overflow: hidden;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #3c4043;
+}
+
+.demo-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.demo-card h4 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    color: #202124;
+}
+
+/* tldraw-Style Bottom Tool Dock */
+#tool-dock {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #dadce0;
+    border-radius: 16px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    z-index: 450;
+}
+
+.dock-btn {
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3c4043;
+    background: transparent;
+    white-space: nowrap;
+}
+
+.dock-btn.active {
+    background: #e8f0fe;
+    color: #1a73e8;
+}
+
+.dock-divider {
+    width: 1px;
+    height: 20px;
+    background: #dadce0;
+    margin: 0 2px;
+}
+
+.ink-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.ink-swatch.active {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px #1a73e8;
+}
+
+/* Floating Chorded Keyboard Layer (Batch 2 Ready) */
+#kbCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1800;
+    display: none;
+}
+
+.kb-btn {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #202124;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    border: 1px solid #dadce0;
+    pointer-events: auto;
+    z-index: 1900;
+}
+
+/* Multi-Touch Error Room Ring (Hidden by default) */
+#multi-touch-ring {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(245, 159, 0, 0.55);
+    background: rgba(254, 215, 145, 0.08);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2190;
+    display: none;
+}
+
+#multi-touch-ring.visible {
+    display: block;
+}
+
+/* Clear Frosted Glass Circle Touchpad (blur(0.5px), Single Visible Ring) */
+#touchpad {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(0.5px);
+    -webkit-backdrop-filter: blur(0.5px);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.14),
+        0 0 0 1px rgba(0, 0, 0, 0.1),
+        inset 0 0 10px rgba(255, 255, 255, 0.85);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2200;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+#touchpad.active-1f {
+    background: rgba(26, 115, 232, 0.14);
+    border-color: rgba(26, 115, 232, 0.55);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.18), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+#touchpad.active-drag {
+    background: rgba(15, 157, 88, 0.16);
+    border-color: rgba(15, 157, 88, 0.6);
+    box-shadow: 0 2px 8px rgba(15, 157, 88, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+#touchpad.active-2f {
+    background: rgba(245, 159, 0, 0.16);
+    border-color: rgba(245, 159, 0, 0.6);
+    box-shadow: 0 2px 8px rgba(245, 159, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+#touchpad.active-3f {
+    background: rgba(142, 68, 173, 0.16);
+    border-color: rgba(142, 68, 173, 0.6);
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+#touchpad.active-4f {
+    background: rgba(0, 151, 167, 0.16);
+    border-color: rgba(0, 151, 167, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 151, 167, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+#touchpad.active-5f {
+    background: rgba(216, 27, 96, 0.16);
+    border-color: rgba(216, 27, 96, 0.6);
+    box-shadow: 0 2px 8px rgba(216, 27, 96, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.75);
+}
+
+/* Clear Frosted Glass Virtual Mouse Cursor (blur(0.5px), No Center Dot) */
+#cursor {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(0.5px);
+    -webkit-backdrop-filter: blur(0.5px);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: block;
+    z-index: 2500;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.16),
+        0 0 0 1px rgba(0, 0, 0, 0.1),
+        inset 0 0 8px rgba(255, 255, 255, 0.85);
+    transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, transform 0.1s;
+}
+
+#cursor.dragging {
+    background: rgba(15, 157, 88, 0.22);
+    border-color: rgba(15, 157, 88, 0.75);
+    box-shadow: 0 2px 10px rgba(15, 157, 88, 0.25), inset 0 0 8px rgba(255, 255, 255, 0.75);
+}
+
+#cursor.drawing {
+    background: rgba(26, 115, 232, 0.22);
+    border-color: rgba(26, 115, 232, 0.85);
+    transform: translate(-50%, -50%) scale(0.75);
+}
+
+/* Toast Notification */
+#toast {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(32, 33, 36, 0.9);
+    color: white;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 3000;
+    pointer-events: none;
+}
+
+
+
+/* =========================================================
+   BATCH 2: EMBEDDED GOOGLE SHEETS CLONE & OVERLAYS
+   ========================================================= */
+.sheets-app-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+}
+
+.sheets-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 8px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.sheet-btn {
+    padding: 4px 8px;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #3c4043;
+}
+
+.sheets-formula-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    background: #ffffff;
+    border-bottom: 1px solid #dadce0;
+    flex-shrink: 0;
+}
+
+.sheets-cell-badge {
+    background: #e8f0fe;
+    color: #1a73e8;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    min-width: 40px;
+    text-align: center;
+    border: 1px solid #d2e3fc;
+}
+
+.sheets-fx-label {
+    font-style: italic;
+    font-weight: bold;
+    color: #5f6368;
+    font-family: serif;
+    font-size: 14px;
+}
+
+.sheets-formula-input {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 8px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    pointer-events: none;
+}
+
+.sheets-formula-input.editing {
+    border-color: #0f9d58;
+    box-shadow: 0 0 0 2px rgba(15, 157, 88, 0.2);
+}
+
+.sheets-viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #ffffff;
+}
+
+.sheets-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.sheets-table th,
+.sheets-table td {
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 6px;
+    font-size: 13px;
+    height: 34px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sheets-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    color: #5f6368;
+    font-weight: 600;
+    text-align: center;
+    width: 86px;
+    height: 26px;
+    z-index: 15;
+}
+
+.sheets-table thead th.corner-header {
+    left: 0;
+    width: 36px;
+    z-index: 25;
+    background: #e8eaed;
+}
+
+.sheets-table tbody th {
+    position: sticky;
+    left: 0;
+    background: #f8f9fa;
+    color: #5f6368;
+    font-weight: 600;
+    text-align: center;
+    width: 36px;
+    z-index: 10;
+}
+
+.sheets-table th.active-header {
+    background: #d2e3fc !important;
+    color: #1a73e8 !important;
+}
+
+.sheets-table td.cell {
+    background: #ffffff;
+    color: #202124;
+    position: relative;
+    width: 86px;
+}
+
+.sheets-table td.cell.selected {
+    outline: 2px solid #1a73e8;
+    outline-offset: -2px;
+    background-color: #f8fbff;
+    z-index: 5;
+}
+
+.sheets-table td.cell.editing-cell {
+    outline: 2px solid #0f9d58;
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    z-index: 6;
+    overflow: visible;
+}
+
+.sheets-table td.cell.drop-target {
+    outline: 2px dashed #0f9d58;
+    background-color: rgba(15, 157, 88, 0.12) !important;
+}
+
+.sheets-table td.cell.fill-range {
+    background-color: rgba(26, 115, 232, 0.12) !important;
+    outline: 1px dashed #1a73e8;
+}
+
+.sheets-fill-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #1a73e8;
+    border: 2px solid white;
+    bottom: -5px;
+    right: -5px;
+    z-index: 8;
+    display: none;
+}
+
+/* Blinking Caret Inside Editing Cell */
+#caret {
+    display: inline-block;
+    width: 2px;
+    height: 16px;
+    background-color: #2196F3;
+    vertical-align: middle;
+    margin-left: 1px;
+    animation: caretBlink 1s step-end infinite;
+}
+
+@keyframes caretBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Chord Keyboard Action Button Tints */
+#btnDone {
+    background: #0f9d58;
+    color: white;
+    border: none;
+}
+
+#btnMode {
+    background: #1a73e8;
+    color: white;
+    font-size: 14px;
+    border: none;
+}
+
+/* Floating Cell Drag Ghost */
+#drag-ghost {
+    position: absolute;
+    width: 90px;
+    height: 34px;
+    background: rgba(26, 115, 232, 0.92);
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 6px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 2050;
+    transform: translate(-50%, -50%) scale(1.06);
+}
+
+/* Cell Right-Click Context Menu */
+#context-menu {
+    position: absolute;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    border: 1px solid #dadce0;
+    display: none;
+    flex-direction: column;
+    min-width: 150px;
+    z-index: 2100;
+    overflow: hidden;
+}
+
+.menu-item {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #202124;
+    border-bottom: 1px solid #f1f3f4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-row {
+    display: flex;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #f8f9fa;
+}
+
+.color-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
